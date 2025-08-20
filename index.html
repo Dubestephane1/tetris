@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="game-info">
+            <h2>BELLA TETRIS</h2>
+            <div class="score-container">
+                <p>Score: <span id="score">0</span></p>
+                <p>Lines: <span id="lines">0</span></p>
+                <p>Level: <span id="level">1</span></p>
+            </div>
+            <div class="next-piece-container">
+                <p>Next Piece:</p>
+                <div id="next-piece"></div>
+            </div>
+            <div class="controls">
+                <p>Controls:</p>
+                <ul>
+                    <li>← → : Move left/right</li>
+                    <li>↑ : Rotate</li>
+                    <li>↓ : Move down</li>
+                    <li>P : Pause</li>
+                </ul>
+                <div class="touch-controls">
+                    <button id="left-button">Left</button>
+                    <button id="right-button">Right</button>
+                    <button id="rotate-button">Rotate</button>
+                    <button id="down-button">Down</button>
+                </div>
+            </div>
+            <button id="start-button">Start / Pause</button>
+        </div>
+        <div class="game-board-container">
+            <div id="game-board"></div>
+        </div>
+    </div>
+    <div id="game-over" class="hidden">
+        <div class="game-over-content">
+            <h2>Game Over</h2>
+            <p>Your score: <span id="final-score">0</span></p>
+            <button id="restart-button">Play Again</button>
+        </div>
+    </div>
+    <script src="tetris.js"></script>
+</body>
+</html>
