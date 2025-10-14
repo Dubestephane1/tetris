@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Full-Page Llama-3.1 (CF Workers AI)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{height:100vh;display:flex;flex-direction:column;background:#0e1117;color:#e6edf3;font-family:system-ui,Arial,Helvetica,sans-serif}
+    header{background:#1e88e5;padding:14px 18px;font-size:18px;font-weight:600}
+    #messages{flex:1;padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+    .msg{max-width:82%;padding:10px 14px;border-radius:12px;line-height:1.4;word-wrap:break-word}
+    .user{align-self:flex-end;background:#1e88e5;color:#fff;border-bottom-right-radius:4px}
+    .bot{align-self:flex-start;background:#21262d;border-bottom-left-radius:4px}
+    #form{border-top:1px solid #30363d;display:flex;padding:10px}
+    #input{flex:1;border:none;padding:12px 14px;font-size:15px;background:#0d1117;color:#e6edf3;border-radius:8px;outline:none}
+    #send{margin-left:10px;border:none;padding:0 20px;border-radius:8px;background:#1e88e5;color:#fff;font-size:15px;cursor:pointer}
+    #send:disabled{background:#555;cursor:not-allowed}
+  </style>
+</head>
+<body>
+
+<header>🦙 Llama-3.1-8B-Instruct</header>
+
+<div id="messages"></div>
+<form id="form">
+  <input id="input" autocomplete="off" placeholder="Ask anything…"/>
+  <button id="send">Send</button>
+</form>
+
+<script>
+(() => {
+  const WORKER = 'https://cameron-chat.mysite101.workers.dev'; // <— your Worker
+  const messages = document.getElementById('messages');
+  const input    = document.getElementById('input');
+  const sendBtn  = document.getElementById('send');
+
+  const addMsg = (txt, who = 'bot') => {
+    const div = document.createElement('div');
+    div.className = 'msg ' + who;
+    div.textContent = txt;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  };
+
+  async function askLlama(text) {
+    addMsg(text, 'user');
+    input.value = '';
+    sendBtn.disabled = true;
+
+    addMsg('', 'bot');
+    const last = messages.lastChild;
+
+    try {
+      const res = await fetch(WORKER, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({messages: [{role: 'user', content: text}]})
+      });
+      
+      if (!res.body) throw new Error('No response body');
+      
+      const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+      let buffer = '';
+      
+      while (true) {
+        const {done, value} = await reader.read();
+        if (done) break;
+        buffer += value;
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        
+        for (const ln of lines) {
+          if (!ln.startsWith('data: ')) continue;
+          try {
+            const {token} = JSON.parse(ln.slice(6));
+            last.textContent += token;
+          } catch (e) {
+            console.error('Error parsing token:', e);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      addMsg('Sorry, there was an error processing your request.', 'bot');
+    } finally {
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  }
+
+  document.getElementById('form').addEventListener('submit', e => {
+    e.preventDefault();
+    const q = input.value.trim();
+    if (q) askLlama(q);
+  });
+
+  // Initial message
+  addMsg('Hi! I\'m Llama-3.1-8B running on Cloudflare Workers AI. Ask me anything.', 'bot');
+  input.focus();
+})();
+</script>
+
+</body>
+</html>
