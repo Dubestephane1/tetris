@@ -48,38 +48,6 @@
         </div>
     </div>
     <script src="tetris.js"></script>
-    <div id="chat-bubble" class="hidden">
-        <div class="chat-container">
-            <div id="chat-messages" class="chat-messages">
-                <div class="message assistant-message">
-                    <p>
-                        Hello! I'm an Cameron. How can I help you today?
-                    </p>
-                </div>
-            </div>
-            <div class="typing-indicator" id="typing-indicator">
-                AI is thinking...
-            </div>
-            <div class="message-input">
-                <textarea
-                    id="user-input"
-                    placeholder="Type your message here..."
-                    rows="1"
-                    autofocus
-                ></textarea>
-                <button id="send-button">Send</button>
-            </div>
-        </div>
-    </div>
-    <button id="chat-toggle-button">Chat</button>
-    <script src="public/chat.js"></script>
-    <script>
-        const chatBubble = document.getElementById('chat-bubble');
-        const chatToggleButton = document.getElementById('chat-toggle-button');
-
-        chatToggleButton.addEventListener('click', () => {
-            chatBubble.classList.toggle('hidden');
-        });
-    </script>
+    
 </body>
 </html>
