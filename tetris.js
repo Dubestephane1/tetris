@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Game constants
     const BOARD_WIDTH = 10;
     const BOARD_HEIGHT = 20;
-    const CELL_SIZE = 30; // in pixels
     const INITIAL_SPEED = 1000; // milliseconds
     const SPEED_INCREASE = 0.8; // multiplier for each level
     const LINES_PER_LEVEL = 10;
@@ -121,15 +120,20 @@ document.addEventListener('DOMContentLoaded', () => {
         restartButton.addEventListener('click', restartGame);
 
         // Touch controls event listeners
-        leftButton.addEventListener('click', moveLeft);
-        rightButton.addEventListener('click', moveRight);
-        rotateButton.addEventListener('click', rotatePiece);
-        downButton.addEventListener('click', moveDown);
+        const buttonBindings = [
+            [leftButton, moveLeft],
+            [rightButton, moveRight],
+            [rotateButton, rotatePiece],
+            [downButton, moveDown]
+        ];
 
-        leftButton.addEventListener('touchstart', event => { event.preventDefault(); moveLeft(); });
-        rightButton.addEventListener('touchstart', event => { event.preventDefault(); moveRight(); });
-        rotateButton.addEventListener('touchstart', event => { event.preventDefault(); rotatePiece(); });
-        downButton.addEventListener('touchstart', event => { event.preventDefault(); moveDown(); });
+        buttonBindings.forEach(([button, action]) => {
+            button.addEventListener('click', action);
+            button.addEventListener('touchstart', event => {
+                event.preventDefault();
+                action();
+            });
+        });
 
         // Game board swipe controls for mobile
         gameBoard.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -139,8 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Create the game board
     function createBoard() {
         gameBoard.innerHTML = '';
-        gameBoard.style.width = `${BOARD_WIDTH * CELL_SIZE}px`;
-        gameBoard.style.height = `${BOARD_HEIGHT * CELL_SIZE}px`;
 
         // Initialize the board array
         board = Array.from({ length: BOARD_HEIGHT }, () => 
@@ -556,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle keyboard input
     function handleKeyPress(event) {
-        if (isGameOver) return;
+        if (isGameOver || isPaused) return;
         
         switch (event.key) {
             case 'ArrowLeft':
@@ -566,10 +568,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 moveRight();
                 break;
             case 'ArrowDown':
-                moveDown();
-                // Add points for soft drop
-                score += 1;
-                updateScore();
+                if (moveDown()) {
+                    // Add points for soft drop
+                    score += 1;
+                    updateScore();
+                }
                 break;
             case 'ArrowUp':
                 rotatePiece();
@@ -616,9 +619,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             if (deltaY > swipeThreshold) {
-                moveDown();
-                score += 1;
-                updateScore();
+                if (moveDown()) {
+                    score += 1;
+                    updateScore();
+                }
             } else if (deltaY < -swipeThreshold) {
                 rotatePiece();
             }
@@ -676,7 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gameOverElement.style.display = 'none'; // Ensure inline style is also set
         
         // Reset button text
-        startButton.textContent = 'Start / Pause';
+        startButton.textContent = 'Pause';
         
         // Reinitialize the game
         createBoard();
