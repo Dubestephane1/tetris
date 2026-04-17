@@ -1,3 +1,53 @@
+/* =========================================
+   NEXUS HUB - BELLA TETRIS STYLES
+   ========================================= */
+
+:root {
+    /* Colors - Brand & UI */
+    --bg-body: #f0f0f0;
+    --bg-container: #ffffff;
+    --bg-panel: #ecf0f1;
+    --text-main: #333333;
+    --text-title: #2c3e50;
+    --text-muted: #6b7280;
+    
+    /* Colors - Actions */
+    --accent-green: #2ecc71;
+    --accent-green-hover: #27ae60;
+    --accent-blue: #3498db;
+    --accent-blue-hover: #2980b9;
+    --accent-red: #e74c3c;
+    --accent-chat: #f6821f;
+    --accent-chat-hover: #e67e22;
+    
+    /* Colors - Tetrominoes */
+    --color-I: #00f0f0; /* Cyan */
+    --color-J: #0000f0; /* Blue */
+    --color-L: #f0a000; /* Orange */
+    --color-O: #f0f000; /* Yellow */
+    --color-S: #00f000; /* Green */
+    --color-T: #a000f0; /* Purple */
+    --color-Z: #f00000; /* Red */
+    --color-ghost: rgba(255, 255, 255, 0.3);
+    
+    /* Layout & Borders */
+    --border-main: #34495e;
+    --border-light: #e5e7eb;
+    --radius-lg: 10px;
+    --radius-md: 8px;
+    --radius-sm: 5px;
+    --shadow-main: 0 0 20px rgba(0, 0, 0, 0.1);
+    --shadow-overlay: 0 0 20px rgba(0, 0, 0, 0.3);
+    
+    /* Animation & Transition */
+    --transition-fast: 0.2s ease;
+    --transition-norm: 0.3s ease;
+}
+
+/* =========================================
+   1. General Reset & Base
+   ========================================= */
+
 * {
     margin: 0;
     padding: 0;
@@ -5,25 +55,32 @@
 }
 
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f0f0f0;
+    font-family: 'Outfit', 'Arial', sans-serif;
+    background-color: var(--bg-body);
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    color: #333;
-    overflow: hidden; /* Prevent scrolling */
+    min-height: 100vh;
+    width: 100%;
+    color: var(--text-main);
+    overflow: auto;
+    padding: 20px;
 }
+
+/* =========================================
+   2. Game Layout
+   ========================================= */
 
 .container {
     display: flex;
     gap: 20px;
-    background-color: #fff;
+    background-color: var(--bg-container);
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    max-height: 95vh; /* Limit height to 95% of viewport */
-    overflow: hidden; /* Prevent container overflow */
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-main);
+    max-width: 1000px;
+    width: min(100%, 980px);
+    flex-wrap: wrap;
 }
 
 .game-info {
@@ -35,26 +92,22 @@ body {
 
 h1 {
     text-align: center;
-    color: #2c3e50;
+    color: var(--text-title);
     font-size: 2rem;
     margin-bottom: 10px;
 }
 
-.score-container {
-    background-color: #ecf0f1;
+.score-container,
+.next-piece-container,
+.controls {
+    background-color: var(--bg-panel);
     padding: 15px;
-    border-radius: 5px;
+    border-radius: var(--radius-sm);
 }
 
 .score-container p {
     margin: 5px 0;
     font-weight: bold;
-}
-
-.next-piece-container {
-    background-color: #ecf0f1;
-    padding: 15px;
-    border-radius: 5px;
 }
 
 #next-piece {
@@ -67,9 +120,7 @@ h1 {
 }
 
 .controls {
-    background-color: #ecf0f1;
-    padding: 15px;
-    border-radius: 5px;
+    width: 100%;
 }
 
 .controls ul {
@@ -81,19 +132,25 @@ h1 {
     margin: 5px 0;
 }
 
-#start-button, #restart-button {
-    background-color: #2ecc71;
+.touch-controls {
+    width: 100%;
+}
+
+#start-button, 
+#restart-button {
+    background-color: var(--accent-green);
     color: white;
     border: none;
     padding: 10px 15px;
-    border-radius: 5px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     font-weight: bold;
-    transition: background-color 0.3s;
+    transition: background-color var(--transition-norm);
 }
 
-#start-button:hover, #restart-button:hover {
-    background-color: #27ae60;
+#start-button:hover, 
+#restart-button:hover {
+    background-color: var(--accent-green-hover);
 }
 
 .game-board-container {
@@ -106,59 +163,45 @@ h1 {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
     grid-template-rows: repeat(20, 1fr);
-    width: 300px;
-    height: 600px;
-    max-height: 80vh; /* Limit height to 80% of viewport */
-    background-color: #ecf0f1;
-    border: 2px solid #34495e;
-    border-collapse: collapse; /* Ensure borders collapse */
+    width: min(90vw, 300px);
+    height: min(90vh, 600px);
+    max-height: 80vh;
+    background-color: var(--bg-panel);
+    border: 2px solid var(--border-main);
+    aspect-ratio: 10 / 20;
 }
 
 .cell {
-    border: none; /* Remove the border that creates spaces */
-    margin: 0; /* Ensure no margin */
-    padding: 0; /* Ensure no padding */
+    margin: 0;
+    padding: 0;
 }
+
+/* =========================================
+   3. Tetrominoes & Colors
+   ========================================= */
 
 .tetromino {
-    border: none; /* Completely remove borders */
-    margin: 0; /* Ensure no margin */
-    padding: 0; /* Ensure no padding */
+    border: none;
+    margin: 0;
+    padding: 0;
 }
 
-/* Tetromino colors */
-.I {
-    background-color: #00f0f0; /* Cyan */
-}
-
-.J {
-    background-color: #0000f0; /* Blue */
-}
-
-.L {
-    background-color: #f0a000; /* Orange */
-}
-
-.O {
-    background-color: #f0f000; /* Yellow */
-}
-
-.S {
-    background-color: #00f000; /* Green */
-}
-
-.T {
-    background-color: #a000f0; /* Purple */
-}
-
-.Z {
-    background-color: #f00000; /* Red */
-}
+.I { background-color: var(--color-I); }
+.J { background-color: var(--color-J); }
+.L { background-color: var(--color-L); }
+.O { background-color: var(--color-O); }
+.S { background-color: var(--color-S); }
+.T { background-color: var(--color-T); }
+.Z { background-color: var(--color-Z); }
 
 .ghost {
-    background-color: rgba(255, 255, 255, 0.1); /* Reduced opacity from 0.3 to 0.1 */
-    border: 1px dotted rgba(0, 0, 0, 0.3); /* Changed from dashed to dotted and reduced opacity */
+    background-color: var(--color-ghost);
+    border: 2px dashed rgba(0, 0, 0, 0.4); /* Enhanced visibility */
 }
+
+/* =========================================
+   4. Overlays & Modals
+   ========================================= */
 
 #game-over {
     position: fixed;
@@ -174,15 +217,15 @@ h1 {
 }
 
 .game-over-content {
-    background-color: white;
+    background-color: var(--bg-container);
     padding: 30px;
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     text-align: center;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-overlay);
 }
 
 .game-over-content h2 {
-    color: #e74c3c;
+    color: var(--accent-red);
     margin-bottom: 20px;
 }
 
@@ -191,58 +234,10 @@ h1 {
     font-size: 1.2rem;
 }
 
+/* =========================================
+   5. Controls & Responsive
+   ========================================= */
 
-
-/* Responsive design */
-@media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .game-info {
-        width: 300px;
-        order: 2;
-    }
-
-    .game-board-container {
-        order: 1;
-        margin-bottom: 20px;
-    }
-}
-
-/* Add responsive scaling for smaller screens */
-@media (max-height: 700px) {
-    #game-board {
-        width: 250px;
-        height: 500px;
-    }
-    
-    .cell {
-        width: 25px;
-        height: 25px;
-    }
-}
-
-@media (max-height: 600px) {
-    #game-board {
-        width: 200px;
-        height: 400px;
-    }
-    
-    .cell {
-        width: 20px;
-        height: 20px;
-    }
-    
-    .game-info {
-        width: 180px;
-    }
-    
-    h1 {
-        font-size: 1.5rem;
-    }
-}
 .touch-controls {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -251,38 +246,72 @@ h1 {
 }
 
 .touch-controls button {
-    background-color: #3498db;
+    background-color: var(--accent-blue);
     color: white;
     border: none;
     padding: 15px;
-    border-radius: 5px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     font-weight: bold;
-    transition: background-color 0.3s;
+    transition: background-color var(--transition-norm);
 }
 
 .touch-controls button:hover {
-    background-color: #2980b9;
+    background-color: var(--accent-blue-hover);
 }
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+    }
+    .game-info {
+        width: min(100%, 340px);
+        order: 2;
+    }
+    .game-board-container {
+        order: 1;
+        margin-bottom: 20px;
+        width: min(100%, 320px);
+    }
+    .touch-controls button {
+        min-height: 56px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-height: 700px) {
+    #game-board { width: 250px; height: 500px; }
+    .cell { width: 25px; height: 25px; }
+}
+
+@media (max-height: 600px) {
+    #game-board { width: 200px; height: 400px; }
+    .cell { width: 20px; height: 20px; }
+    .game-info { width: 180px; }
+    h1 { font-size: 1.5rem; }
+}
+
+/* =========================================
+   6. Chat Interface
+   ========================================= */
 
 #chat-toggle-button {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #f6821f;
+    background-color: var(--accent-chat);
     color: white;
     border: none;
     padding: 10px 15px;
-    border-radius: 5px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     font-weight: bold;
-    transition: background-color 0.3s;
+    transition: background-color var(--transition-norm);
     z-index: 20;
 }
 
-#chat-toggle-button:hover {
-    background-color: #e67e22;
-}
+#chat-toggle-button:hover { background-color: var(--accent-chat-hover); }
 
 #chat-bubble {
     position: fixed;
@@ -290,24 +319,22 @@ h1 {
     right: 20px;
     width: 350px;
     height: 500px;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    background-color: var(--bg-container);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-main);
     z-index: 20;
     display: flex;
     flex-direction: column;
 }
 
-#chat-bubble.hidden {
-    display: none;
-}
+#chat-bubble.hidden { display: none; }
 
 .chat-container {
     display: flex;
     flex-direction: column;
     height: 100%;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
     overflow: hidden;
 }
 
@@ -321,7 +348,7 @@ h1 {
 .message {
     margin-bottom: 1rem;
     padding: 0.75rem;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     max-width: 80%;
     line-height: 1.4;
 }
@@ -340,14 +367,14 @@ h1 {
 .message-input {
     display: flex;
     padding: 0.75rem;
-    border-top: 1px solid #e5e7eb;
-    background-color: white;
+    border-top: 1px solid var(--border-light);
+    background-color: var(--bg-container);
 }
 
 #user-input {
     flex: 1;
     padding: 0.75rem;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-light);
     border-radius: 4px;
     font-family: inherit;
     resize: none;
@@ -357,20 +384,18 @@ h1 {
 #send-button {
     margin-left: 0.5rem;
     padding: 0 1rem;
-    background-color: #f6821f;
+    background-color: var(--accent-chat);
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color var(--transition-fast);
 }
 
-#send-button:hover {
-    background-color: #e67e22;
-}
+#send-button:hover { background-color: var(--accent-chat-hover); }
 
 #send-button:disabled {
-    background-color: #6b7280;
+    background-color: var(--text-muted);
     cursor: not-allowed;
 }
 
@@ -378,10 +403,8 @@ h1 {
     display: none;
     margin-bottom: 1rem;
     font-style: italic;
-    color: #6b7280;
+    color: var(--text-muted);
     padding: 0 1rem;
 }
 
-.typing-indicator.visible {
-    display: block;
-}
+.typing-indicator.visible { display: block; }
