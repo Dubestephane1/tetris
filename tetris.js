@@ -112,6 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
         updateNextPieceDisplay();
         updateGhostPiece();
         drawBoard();
+        updateGameSpeed();
+        startButton.textContent = 'Pause';
     
         // Event listeners
         document.addEventListener('keydown', handleKeyPress);
@@ -626,14 +628,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Toggle pause state
     function togglePause() {
         if (isGameOver) return;
-        
+
         isPaused = !isPaused;
-        
+
         if (isPaused) {
             startButton.textContent = 'Resume';
+            if (gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = null;
+            }
         } else {
             startButton.textContent = 'Pause';
-            // Restart the interval if unpausing
             updateGameSpeed();
         }
     }
