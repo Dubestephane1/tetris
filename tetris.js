@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const INITIAL_SPEED = 1000; // milliseconds
     const SPEED_INCREASE = 0.8; // multiplier for each level
     const LINES_PER_LEVEL = 10;
+    const SWIPE_THRESHOLD = 40;
+    const TAP_THRESHOLD = 150;
 
     // Game variables
     let board = [];
@@ -99,6 +101,29 @@ document.addEventListener('DOMContentLoaded', () => {
             color: 'Z'
         }
     };
+
+    // Helper to get a random tetromino
+    function getRandomTetromino() {
+        const types = Object.keys(TETROMINOES);
+        const type = types[Math.floor(Math.random() * types.length)];
+        return {
+            type: type,
+            shape: TETROMINOES[type].shape,
+            color: TETROMINOES[type].color
+        };
+    }
+
+    // Helper to iterate over each solid cell of a piece
+    function forEachPieceCell(piece, callback) {
+        const shape = piece.shape;
+        for (let r = 0; r < shape.length; r++) {
+            for (let c = 0; c < shape[r].length; c++) {
+                if (shape[r][c]) {
+                    callback(piece.row + r, piece.col + c);
+                }
+            }
+        }
+    }
 
     // Initialize the game
     function init() {
@@ -177,48 +202,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Generate a new random tetromino
     function generateNewPiece() {
-        const tetrominoTypes = Object.keys(TETROMINOES);
-        const randomType = tetrominoTypes[Math.floor(Math.random() * tetrominoTypes.length)];
-        
         if (!nextPiece) {
-            // First piece
-            currentPiece = {
-                type: randomType,
-                shape: TETROMINOES[randomType].shape,
-                color: TETROMINOES[randomType].color,
-                row: 0,
-                col: Math.floor((BOARD_WIDTH - TETROMINOES[randomType].shape[0].length) / 2)
-            };
-            
-            // Generate the next piece
-            const nextRandomType = tetrominoTypes[Math.floor(Math.random() * tetrominoTypes.length)];
-            nextPiece = {
-                type: nextRandomType,
-                shape: TETROMINOES[nextRandomType].shape,
-                color: TETROMINOES[nextRandomType].color
-            };
-        } else {
-            // Use the next piece as the current piece
-            currentPiece = {
-                type: nextPiece.type,
-                shape: nextPiece.shape,
-                color: nextPiece.color,
-                row: 0,
-                col: Math.floor((BOARD_WIDTH - nextPiece.shape[0].length) / 2)
-            };
-            
-            // Generate a new next piece
-            const nextRandomType = tetrominoTypes[Math.floor(Math.random() * tetrominoTypes.length)];
-            nextPiece = {
-                type: nextRandomType,
-                shape: TETROMINOES[nextRandomType].shape,
-                color: TETROMINOES[nextRandomType].color
-            };
+            nextPiece = getRandomTetromino();
         }
+
+        currentPiece = {
+            ...nextPiece,
+            row: 0,
+            col: Math.floor((BOARD_WIDTH - nextPiece.shape[0].length) / 2)
+        };
+        
+        nextPiece = getRandomTetromino();
         
         // Check if the new piece can be placed
         if (!isValidMove(currentPiece.row, currentPiece.col, currentPiece.shape)) {
             gameOver();
+            return;
         }
     }
 
@@ -263,16 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     
         // Drop the ghost piece as far as it can go
-        let dropDistance = 0;
         while (isValidMove(ghostPiece.row + 1, ghostPiece.col, ghostPiece.shape)) {
             ghostPiece.row++;
-            dropDistance++;
-        }
-        
-        // If the ghost piece is too close to the current piece (less than 2 rows away),
-        // don't show it to avoid the transparency effect
-        if (dropDistance < 2) {
-            ghostPiece = null;
         }
     }
 
@@ -296,61 +287,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Draw the ghost piece
         if (ghostPiece && !isPaused && !isGameOver) {
-            const shape = ghostPiece.shape;
-            for (let row = 0; row < shape.length; row++) {
-                for (let col = 0; col < shape[row].length; col++) {
-                    if (shape[row][col]) {
-                        const boardRow = ghostPiece.row + row;
-                        const boardCol = ghostPiece.col + col;
-                        if (boardRow >= 0 && boardRow < BOARD_HEIGHT) {
-                            const cellIndex = boardRow * BOARD_WIDTH + boardCol;
-                            cells[cellIndex].classList.add('ghost');
-                        }
-                    }
+            forEachPieceCell(ghostPiece, (row, col) => {
+                if (row >= 0 && row < BOARD_HEIGHT) {
+                    const cellIndex = row * BOARD_WIDTH + col;
+                    cells[cellIndex].classList.add('ghost');
                 }
-            }
+            });
         }
 
         // Draw the current piece
         if (currentPiece && !isGameOver) {
-            const shape = currentPiece.shape;
-            const color = currentPiece.color;
-            for (let row = 0; row < shape.length; row++) {
-                for (let col = 0; col < shape[row].length; col++) {
-                    if (shape[row][col]) {
-                        const boardRow = currentPiece.row + row;
-                        const boardCol = currentPiece.col + col;
-                        if (boardRow >= 0 && boardRow < BOARD_HEIGHT) {
-                            const cellIndex = boardRow * BOARD_WIDTH + boardCol;
-                            cells[cellIndex].classList.add('tetromino', color);
-                        }
-                    }
+            forEachPieceCell(currentPiece, (row, col) => {
+                if (row >= 0 && row < BOARD_HEIGHT) {
+                    const cellIndex = row * BOARD_WIDTH + col;
+                    cells[cellIndex].classList.add('tetromino', currentPiece.color);
                 }
-            }
+            });
         }
     }
 
     // Check if a move is valid
     function isValidMove(row, col, shape) {
-        for (let r = 0; r < shape.length; r++) {
-            for (let c = 0; c < shape[r].length; c++) {
-                if (shape[r][c]) {
-                    const newRow = row + r;
-                    const newCol = col + c;
-
-                    // Check boundaries
-                    if (newRow < 0 || newRow >= BOARD_HEIGHT || newCol < 0 || newCol >= BOARD_WIDTH) {
-                        return false;
-                    }
-
-                    // Check collision with fixed pieces
-                    if (newRow >= 0 && board[newRow][newCol]) {
-                        return false;
-                    }
-                }
+        let valid = true;
+        forEachPieceCell({ row, col, shape }, (newRow, newCol) => {
+            // Check boundaries
+            if (newRow < 0 || newRow >= BOARD_HEIGHT || newCol < 0 || newCol >= BOARD_WIDTH) {
+                valid = false;
             }
-        }
-        return true;
+            // Check collision with fixed pieces
+            else if (newRow >= 0 && board[newRow][newCol]) {
+                valid = false;
+            }
+        });
+        return valid;
     }
 
     // Rotate the current piece
@@ -455,30 +424,18 @@ document.addEventListener('DOMContentLoaded', () => {
         updateGhostPiece();
         drawBoard();
         
-        // Add a small delay before locking the piece
-        setTimeout(() => {
-            lockPiece();
-            updateScore();
-        }, 100); // 100ms delay
+        // Lock the piece immediately to avoid race conditions
+        lockPiece();
+        updateScore();
     }
 
     // Lock the current piece in place
     function lockPiece() {
-        const shape = currentPiece.shape;
-        const color = currentPiece.color;
-        
-        for (let row = 0; row < shape.length; row++) {
-            for (let col = 0; col < shape[row].length; col++) {
-                if (shape[row][col]) {
-                    const boardRow = currentPiece.row + row;
-                    const boardCol = currentPiece.col + col;
-                    
-                    if (boardRow >= 0) {
-                        board[boardRow][boardCol] = color;
-                    }
-                }
+        forEachPieceCell(currentPiece, (row, col) => {
+            if (row >= 0) {
+                board[row][col] = currentPiece.color;
             }
-        }
+        });
         
         // Check for completed lines
         checkLines();
@@ -603,27 +560,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const deltaTime = Date.now() - touchStartTime;
         const absX = Math.abs(deltaX);
         const absY = Math.abs(deltaY);
-        const swipeThreshold = 40;
-        const tapThreshold = 150;
 
-        if (absX < swipeThreshold && absY < swipeThreshold && deltaTime < tapThreshold) {
+        if (absX < SWIPE_THRESHOLD && absY < SWIPE_THRESHOLD && deltaTime < TAP_THRESHOLD) {
             rotatePiece();
             return;
         }
 
         if (absX > absY) {
-            if (deltaX > swipeThreshold) {
+            if (deltaX > SWIPE_THRESHOLD) {
                 moveRight();
-            } else if (deltaX < -swipeThreshold) {
+            } else if (deltaX < -SWIPE_THRESHOLD) {
                 moveLeft();
             }
         } else {
-            if (deltaY > swipeThreshold) {
+            if (deltaY > SWIPE_THRESHOLD) {
                 if (moveDown()) {
                     score += 1;
                     updateScore();
                 }
-            } else if (deltaY < -swipeThreshold) {
+            } else if (deltaY < -SWIPE_THRESHOLD) {
                 rotatePiece();
             }
         }
