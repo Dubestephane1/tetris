@@ -16,6 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const rotateButton = document.getElementById('rotate-button');
     const downButton = document.getElementById('down-button');
 
+    // Mobile touch gesture tracking
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+
     // Game constants
     const BOARD_WIDTH = 10;
     const BOARD_HEIGHT = 20;
@@ -118,6 +123,15 @@ document.addEventListener('DOMContentLoaded', () => {
         rightButton.addEventListener('click', moveRight);
         rotateButton.addEventListener('click', rotatePiece);
         downButton.addEventListener('click', moveDown);
+
+        leftButton.addEventListener('touchstart', event => { event.preventDefault(); moveLeft(); });
+        rightButton.addEventListener('touchstart', event => { event.preventDefault(); moveRight(); });
+        rotateButton.addEventListener('touchstart', event => { event.preventDefault(); rotatePiece(); });
+        downButton.addEventListener('touchstart', event => { event.preventDefault(); moveDown(); });
+
+        // Game board swipe controls for mobile
+        gameBoard.addEventListener('touchstart', handleTouchStart, { passive: true });
+        gameBoard.addEventListener('touchend', handleTouchEnd);
     }
 
     // Create the game board
@@ -565,6 +579,47 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'P':
                 togglePause();
                 break;
+        }
+    }
+
+    function handleTouchStart(event) {
+        if (isGameOver || isPaused || !currentPiece) return;
+        const touch = event.changedTouches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        touchStartTime = Date.now();
+    }
+
+    function handleTouchEnd(event) {
+        if (isGameOver || isPaused || !currentPiece) return;
+        const touch = event.changedTouches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+        const deltaTime = Date.now() - touchStartTime;
+        const absX = Math.abs(deltaX);
+        const absY = Math.abs(deltaY);
+        const swipeThreshold = 40;
+        const tapThreshold = 150;
+
+        if (absX < swipeThreshold && absY < swipeThreshold && deltaTime < tapThreshold) {
+            rotatePiece();
+            return;
+        }
+
+        if (absX > absY) {
+            if (deltaX > swipeThreshold) {
+                moveRight();
+            } else if (deltaX < -swipeThreshold) {
+                moveLeft();
+            }
+        } else {
+            if (deltaY > swipeThreshold) {
+                moveDown();
+                score += 1;
+                updateScore();
+            } else if (deltaY < -swipeThreshold) {
+                rotatePiece();
+            }
         }
     }
 

@@ -254,6 +254,13 @@ h1 {
     cursor: pointer;
     font-weight: bold;
     transition: background-color var(--transition-norm);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+#game-board {
+    touch-action: none;
 }
 
 .touch-controls button:hover {
@@ -274,10 +281,17 @@ h1 {
         margin-bottom: 20px;
         width: min(100%, 320px);
     }
+    .touch-controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
     .touch-controls button {
         min-height: 56px;
         font-size: 1rem;
     }
+    .game-info {
+        padding-bottom: 10px;
+    }
+}
 }
 
 @media (max-height: 700px) {
