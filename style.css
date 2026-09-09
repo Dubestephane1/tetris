@@ -1,26 +1,516 @@
-/* Updated styles for mobile responsiveness */
+/* =========================================
+   BELLA TETRIS STYLES
+   Modern 2026 look: dark gradient background,
+   glassmorphism panels, glowing gradient title,
+   neon accents. Layout stays 3-column arcade:
+   title on top, hold+next left, board center,
+   score+controls right.
+   ========================================= */
 
-@media screen and (max-width: 600px) {
-    /* Styles specifically for mobile devices */
-    body {
-        font-size: 16px;
-        padding: 0;
+/* Font (kept inside CSS so no HTML change needed) */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap');
+
+:root {
+    /* Base */
+    --bg-body: #070b1a;
+    --bg-container: rgba(13, 18, 36, 0.72);
+    --bg-panel: rgba(255, 255, 255, 0.045);
+    --text-main: #e6eaf5;
+    --text-title: #ffffff;
+    --text-muted: #94a3b8;
+
+    /* Neon accents */
+    --accent-green: #34d399;
+    --accent-green-hover: #4ade80;
+    --accent-blue: #22d3ee;
+    --accent-blue-hover: #67e8f9;
+    --accent-red: #f87171;
+
+    /* Colors - Tetrominoes (neon on dark) */
+    --color-I: #22d3ee; /* Cyan */
+    --color-J: #6366f1; /* Indigo */
+    --color-L: #fb923c; /* Orange */
+    --color-O: #facc15; /* Yellow */
+    --color-S: #4ade80; /* Green */
+    --color-T: #c084fc; /* Purple */
+    --color-Z: #f87171; /* Red */
+    --color-ghost: rgba(148, 163, 184, 0.12);
+
+    /* Layout & Borders */
+    --border-main: rgba(148, 163, 184, 0.25);
+    --border-light: rgba(255, 255, 255, 0.08);
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --shadow-main: 0 24px 60px rgba(0, 0, 0, 0.5);
+    --shadow-overlay: 0 24px 60px rgba(0, 0, 0, 0.6);
+    --glow-green: 0 6px 20px rgba(52, 211, 153, 0.35);
+    --glow-blue: 0 6px 20px rgba(34, 211, 238, 0.3);
+
+    /* Animation & Transition */
+    --transition-norm: 0.25s ease;
+}
+
+/* 1. General Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background:
+        radial-gradient(ellipse 60% 50% at 15% 10%, rgba(88, 28, 135, 0.32), transparent 60%),
+        radial-gradient(ellipse 50% 40% at 85% 15%, rgba(8, 145, 178, 0.28), transparent 60%),
+        radial-gradient(ellipse 70% 55% at 50% 110%, rgba(30, 58, 138, 0.35), transparent 60%),
+        linear-gradient(160deg, #070b1a 0%, #0d1330 50%, #0a1128 100%);
+    background-attachment: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+    color: var(--text-main);
+    overflow: auto;
+    padding: 20px;
+}
+
+/* 2. Game Layout — 3 columns, centered */
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    background: var(--bg-container);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--border-light);
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-main);
+    max-width: 900px;
+    width: min(100%, 900px);
+}
+
+.game-title {
+    flex-basis: 100%;
+    text-align: center;
+    display: block;
+    white-space: nowrap;
+    line-height: 1.15;
+    color: var(--text-title);
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    background: linear-gradient(90deg, #22d3ee 0%, #a78bfa 45%, #f472b6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    /* NOTE: no text-shadow / filter here — with background-clip:text the
+       text fill is transparent, so text-shadow paints a duplicate ghost of
+       the letters (looks like "2 lines"). Keep the gradient fill clean. */
+}
+
+/* Side panels: hold + next on the left, score + controls on the right.
+   Stretched to the board's height so every card ends on the same bottom
+   line - nothing hangs below the central game box. */
+.side-panel {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-self: stretch;
+}
+
+.game-board-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    align-self: stretch;
+}
+
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(20, 1fr);
+    gap: 2px;
+    padding: 4px;
+    width: min(90vw, 320px);
+    height: auto;
+    background:
+        linear-gradient(rgba(148, 163, 184, 0.05), rgba(148, 163, 184, 0.05)),
+        #0a0f1e;
+    border: 1px solid var(--border-main);
+    border-radius: var(--radius-sm);
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.6), 0 0 26px rgba(34, 211, 238, 0.10);
+    aspect-ratio: 10 / 20;
+    overflow: hidden;
+}
+
+.cell {
+    margin: 0;
+    padding: 0;
+    border-radius: 3px;
+}
+
+/* 3. Panels & Cards */
+.score-container,
+.hold-container,
+.next-piece-container,
+.controls {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-light);
+    padding: 16px;
+    border-radius: var(--radius-md);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Section labels: small uppercase captions with an accent tint */
+.hold-container > p:first-child,
+.next-piece-container > p:first-child,
+.controls > p:first-child {
+    margin: 0 0 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent-blue);
+}
+
+.hold-container > p:first-child {
+    color: var(--accent-green);
+}
+
+/* Score rows: muted label left, bright tabular value right */
+.score-container p {
+    margin: 6px 0;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.score-container p span {
+    color: var(--text-title);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Preview grids: none, one highlighted, queue is compact */
+#next-piece,
+#next-piece-2,
+#next-piece-3,
+#hold-piece {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 1px;
+    padding: 2px;
+    margin: 10px auto;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 6px;
+}
+
+#next-piece {
+    height: 80px;
+    width: 80px;
+}
+
+#next-piece-2,
+#next-piece-3 {
+    height: 56px;
+    width: 56px;
+}
+
+#hold-piece {
+    height: 56px;
+    width: 56px;
+}
+
+/* Last card in each panel grows to fill the board height */
+.next-piece-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.hold-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#start-button {
+    background: linear-gradient(135deg, #34d399, #10b981);
+    color: #04120c;
+    border: none;
+    padding: 12px 15px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all var(--transition-norm);
+    width: 100%;
+    box-shadow: var(--glow-green);
+}
+
+#start-button:hover {
+    background: linear-gradient(135deg, #4ade80, #34d399);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 26px rgba(52, 211, 153, 0.5);
+}
+
+.controls ul {
+    list-style-type: none;
+    padding-left: 10px;
+    margin: 0;
+}
+
+.controls li {
+    margin: 3px 0;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.3;
+}
+
+.controls p {
+    color: var(--text-muted);
+    font-weight: 600;
+    margin: 0 0 6px;
+}
+
+/* Controls card grows to fill the panel; touch buttons pinned to the bottom.
+   overflow:hidden is a hard clamp so no line can ever spill below the box. */
+.controls {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 4. Tetrominoes & Colors */
+.tetromino {
+    border: none;
+    margin: 0;
+    padding: 0;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.18);
+}
+
+.I { background-color: var(--color-I); }
+.J { background-color: var(--color-J); }
+.L { background-color: var(--color-L); }
+.O { background-color: var(--color-O); }
+.S { background-color: var(--color-S); }
+.T { background-color: var(--color-T); }
+.Z { background-color: var(--color-Z); }
+
+.ghost {
+    background-color: var(--color-ghost);
+    border: 1px dashed rgba(148, 163, 184, 0.45);
+    border-radius: 3px;
+}
+
+/* 5. Overlays & Modals */
+#game-over {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(4, 6, 16, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+/* Explicit hide (more specific than the #game-over rule above) */
+#game-over.hidden,
+#game-over.hidden * {
+    display: none;
+}
+
+/* Generic utility: hide an element */
+.hidden {
+    display: none !important;
+}
+
+.game-over-content {
+    background: rgba(13, 18, 36, 0.92);
+    border: 1px solid var(--border-light);
+    padding: 34px 40px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-overlay);
+}
+
+.game-over-content h2 {
+    color: var(--accent-red);
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.game-over-content p {
+    margin-bottom: 16px;
+    font-size: 1.15rem;
+    color: var(--text-muted);
+}
+
+.game-over-content p span {
+    color: var(--text-title);
+    font-weight: 700;
+}
+
+#new-high-score {
+    color: var(--accent-green);
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+#restart-button {
+    background: linear-gradient(135deg, #22d3ee, #3b82f6);
+    color: #04121a;
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all var(--transition-norm);
+    box-shadow: var(--glow-blue);
+}
+
+#restart-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 26px rgba(34, 211, 238, 0.5);
+}
+
+/* 6. Touch Controls & Responsive */
+.touch-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+    margin-bottom: 0;
+}
+
+.touch-controls button {
+    min-width: 0;
+    white-space: nowrap;
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.9), rgba(59, 130, 246, 0.9));
+    color: #04121a;
+    border: none;
+    padding: 10px 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    transition: all var(--transition-norm);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+#game-board {
+    touch-action: none;
+}
+
+.touch-controls button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(34, 211, 238, 0.4);
+}
+
+/* Hold is the 5th button: full-width row below the 2x2 move buttons */
+#hold-button {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.9), rgba(16, 185, 129, 0.9));
+}
+
+#hold-button:hover {
+    box-shadow: 0 6px 18px rgba(52, 211, 153, 0.45);
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+        padding: 16px;
     }
-
-    /* Touch control styles */
-    .control {
-        display: flex;
+    .side-panel {
+        width: min(100%, 340px);
+        flex-direction: row;
+        flex-wrap: wrap;
         justify-content: center;
-        margin: 10px;
     }
-
-    .control-button {
-        width: 50px;
-        height: 50px;
-        margin: 5px;
+    .score-container,
+    .hold-container,
+    .next-piece-container,
+    .controls {
+        width: min(100%, 340px);
+    }
+    .game-board-container {
+        order: -1;
+        width: min(100%, 340px);
+    }
+    .game-title {
+        order: -2;
+        font-size: 1.5rem;
+        letter-spacing: 4px;
+    }
+    .side-left {
+        order: 2;
+    }
+    .side-right {
+        order: 3;
+        flex-direction: column;
+    }
+    .touch-controls button {
+        min-height: 56px;
+        font-size: 1rem;
+    }
+    .next-piece-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 }
 
-/* Ensured proper structuring of media queries */
+@media (max-height: 700px) {
+    #game-board { width: 250px; height: 500px; }
+}
 
-/* Other styles... (not shown for brevity) */
+@media (max-height: 600px) {
+    #game-board { width: 200px; height: 400px; }
+    .side-panel { width: 180px; }
+    .game-title { font-size: 1.4rem; letter-spacing: 3px; }
+}

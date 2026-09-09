@@ -8,46 +8,64 @@
 </head>
 <body>
     <div class="container">
-        <div class="game-info">
-            <h2>BELLA TETRIS</h2>
+        <h2 class="game-title">BELLA TETRIS</h2>
+
+        <aside class="side-panel side-left">
+            <button id="start-button">Start / Pause</button>
+            <div class="hold-container">
+                <p>Hold (C):</p>
+                <div id="hold-piece"></div>
+            </div>
+            <div class="next-piece-container">
+                <p>Next:</p>
+                <div id="next-piece"></div>
+                <div id="next-piece-2"></div>
+                <div id="next-piece-3"></div>
+            </div>
+        </aside>
+
+        <div class="game-board-container">
+            <div id="game-board"></div>
+        </div>
+
+        <aside class="side-panel side-right">
             <div class="score-container">
                 <p>Score: <span id="score">0</span></p>
                 <p>Lines: <span id="lines">0</span></p>
                 <p>Level: <span id="level">1</span></p>
-            </div>
-            <div class="next-piece-container">
-                <p>Next Piece:</p>
-                <div id="next-piece"></div>
+                <p>High Score: <span id="high-score">0</span></p>
             </div>
             <div class="controls">
                 <p>Controls:</p>
                 <ul>
-                    <li>← → : Move left/right</li>
+                    <li>← → : Move</li>
                     <li>↑ : Rotate</li>
-                    <li>↓ : Move down</li>
-                <li>P : Pause</li>
-            </ul>
-            <div class="touch-controls">
-                <button id="left-button">Left</button>
-                <button id="right-button">Right</button>
+                    <li>↓ : Soft drop</li>
+                    <li>Space : Hard drop</li>
+                    <li>C : Hold</li>
+                    <li>P : Pause</li>
+                </ul>
+                <div class="touch-controls">
+                    <button id="left-button">Left</button>
+                    <button id="right-button">Right</button>
                     <button id="rotate-button">Rotate</button>
                     <button id="down-button">Down</button>
+                    <button id="hold-button">Hold</button>
                 </div>
             </div>
-            <button id="start-button">Start / Pause</button>
-        </div>
-        <div class="game-board-container">
-            <div id="game-board"></div>
-        </div>
+        </aside>
     </div>
+
     <div id="game-over" class="hidden">
         <div class="game-over-content">
             <h2>Game Over</h2>
             <p>Your score: <span id="final-score">0</span></p>
+            <p>High Score: <span id="final-high-score">0</span></p>
+            <p id="new-high-score" class="hidden">NEW HIGH SCORE!</p>
             <button id="restart-button">Play Again</button>
         </div>
     </div>
+    <script src="tetris-core.js"></script>
     <script src="tetris.js"></script>
-    
 </body>
 </html>
